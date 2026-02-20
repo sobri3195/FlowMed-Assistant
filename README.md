@@ -22,6 +22,20 @@ Salin `.env.example` menjadi `.env.local` lalu isi:
 - `GROQ_API_KEY` (wajib jika `groq`, dapat gratis dari Groq Console)
 - `GROQ_MODEL` (opsional, default: `llama-3.1-8b-instant`)
 
+Variabel tambahan yang sudah disiapkan di `.env.example`:
+
+- OpenAI: `OPENAI_API_KEY`, `OPENAI_ORG_ID`, `OPENAI_PROJECT_ID`
+- Anthropic: `ANTHROPIC_API_KEY`
+- Gemini: `GEMINI_API_KEY`
+- AWS: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`
+- Stripe: `STRIPE_API_KEY`, `STRIPE_WEBHOOK_SECRET`
+- GitHub: `GITHUB_TOKEN`
+- Slack/Discord: `SLACK_BOT_TOKEN`, `DISCORD_BOT_TOKEN`
+- Twilio/SendGrid: `TWILIO_AUTH_TOKEN`, `SENDGRID_API_KEY`
+- Mapbox/Supabase: `MAPBOX_API_KEY`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
+
+> Gunakan `.env.local` untuk nilai asli secret key, jangan commit nilai secret ke repository.
+
 ## Deploy ke Vercel
 
 1. Push repo ke GitHub/GitLab/Bitbucket.
