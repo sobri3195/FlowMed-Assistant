@@ -26,20 +26,31 @@ function buildMockReply(lastMessage: string): string {
 }
 
 async function callOpenAIProvider(messages: IncomingMessage[]): Promise<string> {
-  const apiKey = process.env.AI_API_KEY;
+  const apiKey = process.env.OPENAI_API_KEY || process.env.AI_API_KEY;
   if (!apiKey) {
-    throw new Error("AI_API_KEY belum diset.");
+    throw new Error("OPENAI_API_KEY atau AI_API_KEY belum diset.");
   }
 
   const baseUrl = process.env.AI_BASE_URL || "https://api.openai.com/v1";
   const model = process.env.AI_MODEL || "gpt-4o-mini";
+  const orgId = process.env.OPENAI_ORG_ID;
+  const projectId = process.env.OPENAI_PROJECT_ID;
+
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${apiKey}`
+  };
+
+  if (orgId) {
+    headers["OpenAI-Organization"] = orgId;
+  }
+  if (projectId) {
+    headers["OpenAI-Project"] = projectId;
+  }
 
   const response = await fetch(`${baseUrl.replace(/\/$/, "")}/chat/completions`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`
-    },
+    headers,
     body: JSON.stringify({
       model,
       messages
