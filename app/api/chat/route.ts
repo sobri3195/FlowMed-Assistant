@@ -63,6 +63,44 @@ async function callOpenAIProvider(messages: IncomingMessage[]): Promise<string> 
   return reply;
 }
 
+async function callGroqProvider(messages: IncomingMessage[]): Promise<string> {
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) {
+    throw new Error("GROQ_API_KEY belum diset.");
+  }
+
+  const model = process.env.GROQ_MODEL || "llama-3.1-8b-instant";
+
+  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`
+    },
+    body: JSON.stringify({
+      model,
+      messages,
+      temperature: 0.4
+    })
+  });
+
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(`Groq error (${response.status}): ${detail || "Unknown error"}`);
+  }
+
+  const data = (await response.json()) as {
+    choices?: Array<{ message?: { content?: string } }>;
+  };
+
+  const reply = data.choices?.[0]?.message?.content?.trim();
+  if (!reply) {
+    throw new Error("Groq tidak mengembalikan respons.");
+  }
+
+  return reply;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as ChatRequestBody;
@@ -80,8 +118,13 @@ export async function POST(request: NextRequest) {
       reply = buildMockReply(lastUserMessage?.content || "");
     } else if (provider === "openai") {
       reply = await callOpenAIProvider(sanitized);
+    } else if (provider === "groq") {
+      reply = await callGroqProvider(sanitized);
     } else {
-      return NextResponse.json({ error: "AI_PROVIDER tidak didukung. Gunakan mock atau openai." }, { status: 400 });
+      return NextResponse.json(
+        { error: "AI_PROVIDER tidak didukung. Gunakan mock, openai, atau groq." },
+        { status: 400 }
+      );
     }
 
     return NextResponse.json({ reply });
